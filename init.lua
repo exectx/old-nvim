@@ -88,7 +88,7 @@ require('lazy').setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', opts = {} },
+      { 'j-hui/fidget.nvim',       opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
@@ -124,7 +124,7 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  { 'folke/which-key.nvim',  opts = {} },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -167,6 +167,9 @@ require('lazy').setup({
           return '<Ignore>'
         end, { expr = true, desc = 'Jump to previous hunk' })
 
+        -- Git god mode
+        map('n', '<leader>gs', vim.cmd.Git)
+
         -- Actions
         -- visual mode
         map('v', '<leader>hs', function()
@@ -202,15 +205,11 @@ require('lazy').setup({
 
   {
     -- Theme inspired by Atom
-    'navarasu/onedark.nvim',
+    'cideM/yui',
     priority = 1000,
     lazy = false,
     config = function()
-      require('onedark').setup {
-        -- Set a style preset. 'dark' is default.
-        style = 'dark', -- dark, darker, cool, deep, warm, warmer, light
-      }
-      require('onedark').load()
+      vim.cmd([[colorscheme yui]])
     end,
   },
 
@@ -273,8 +272,8 @@ require('lazy').setup({
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
-  -- require 'kickstart.plugins.autoformat',
-  -- require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.autoformat',
+  require 'kickstart.plugins.debug',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
@@ -282,7 +281,7 @@ require('lazy').setup({
   --    Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {})
 
 -- [[ Setting options ]]
@@ -326,11 +325,25 @@ vim.o.completeopt = 'menuone,noselect'
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
 
+vim.opt.tabstop = 2
+vim.opt.softtabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.expandtab = true
+
 -- [[ Basic Keymaps ]]
 
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
+vim.keymap.set("v", "<leader>dd", [["_d]]) -- delete to blackhole register
+vim.keymap.set("v", "<Del>", [["_d]])      -- delete to blackhole register
+vim.keymap.set("v", "<BS>", [["_d]])       -- delete to blackhole register
+vim.keymap.set("n", "YY", "va{Vy")         -- yank function including the name
+vim.keymap.set('n', '<C-l>', '<C-^>')      -- swap betwee last 2 buffers
+vim.keymap.set('n', 'Q', '@qj')            -- macros
+vim.keymap.set('x', 'Q', ':norm @q<CR>')   -- repeat more macros
 
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
@@ -405,6 +418,10 @@ end
 
 vim.api.nvim_create_user_command('LiveGrepGitRoot', live_grep_git_root, {})
 
+-- Custom Telescope
+vim.keymap.set('n', '<D-p>', require('telescope.builtin').find_files, {})
+vim.keymap.set('n', '<D-k>', require('telescope.builtin').live_grep)
+
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
 vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
@@ -433,6 +450,34 @@ vim.keymap.set('n', '<leader>sG', ':LiveGrepGitRoot<cr>', { desc = '[S]earch by 
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
 
+
+local fugitiveAutogrup = vim.api.nvim_create_augroup("ThePrimeagen_Fugitive", {})
+local autocmd = vim.api.nvim_create_autocmd
+autocmd("BufWinEnter", {
+  group = fugitiveAutogrup,
+  pattern = "*",
+  callback = function()
+    if vim.bo.ft ~= "fugitive" then
+      return
+    end
+
+    local bufnr = vim.api.nvim_get_current_buf()
+    local opts = { buffer = bufnr, remap = false }
+    vim.keymap.set("n", "<leader>p", function()
+      vim.cmd.Git('push')
+    end, opts)
+
+    -- rebase always
+    vim.keymap.set("n", "<leader>P", function()
+      vim.cmd.Git({ 'pull', '--rebase' })
+    end, opts)
+
+    -- NOTE: It allows me to easily set the branch i am pushing and any tracking
+    -- needed if i did not set the branch up correctly
+    vim.keymap.set("n", "<leader>t", ":Git push -u origin ", opts);
+  end,
+})
+
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 -- Defer Treesitter setup after first render to improve startup time of 'nvim {filename}'
@@ -441,6 +486,12 @@ vim.defer_fn(function()
     -- Add languages to be installed here that you want installed for treesitter
     ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
 
+    autotag = {
+      enable = true,
+    },
+    matchup = {
+      enable = true,
+    },
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
     -- Install languages synchronously (only applied to `ensure_installed`)
@@ -554,6 +605,8 @@ local on_attach = function(_, bufnr)
   end, { desc = 'Format current buffer with LSP' })
 end
 
+vim.keymap.set({ 'n', 'i' }, '<D-i>', vim.lsp.buf.signature_help)
+
 -- document existing key chains
 require('which-key').register {
   ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
@@ -645,6 +698,7 @@ cmp.setup {
     completeopt = 'menu,menuone,noinsert',
   },
   mapping = cmp.mapping.preset.insert {
+    ['<C-e>'] = cmp.mapping.abort(),
     ['<C-n>'] = cmp.mapping.select_next_item(),
     ['<C-p>'] = cmp.mapping.select_prev_item(),
     ['<C-b>'] = cmp.mapping.scroll_docs(-4),
