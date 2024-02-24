@@ -360,6 +360,9 @@ vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open float
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
 vim.keymap.set('n', '<leader>k', '<cmd>lnext<CR>zz')
 vim.keymap.set('n', '<leader>j', '<cmd>lprev<CR>zz')
+vim.keymap.set('n', '<leader>oe', vim.diagnostic.setqflist, { desc = 'Open project diagnostics list' })
+vim.keymap.set('n', '<leader>ok', '<cmd>cnext<CR>zz')
+vim.keymap.set('n', '<leader>oj', '<cmd>cprev<CR>zz')
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
