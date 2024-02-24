@@ -57,8 +57,11 @@ return {
           buffer = bufnr,
           callback = function()
             if not format_is_enabled then
+              -- print("format not enabled", client.name)
               return
             end
+
+            -- print("format enabled :3", client.name)
 
             vim.lsp.buf.format {
               async = false,

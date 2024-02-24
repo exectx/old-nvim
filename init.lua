@@ -131,11 +131,11 @@ require('lazy').setup({
     opts = {
       -- See `:help gitsigns.txt`
       signs = {
-        add = { text = '+' },
-        change = { text = '~' },
-        delete = { text = '_' },
-        topdelete = { text = '‾' },
-        changedelete = { text = '~' },
+        add = { text = '▋' },
+        change = { text = '▋' },
+        delete = { text = '▶' },
+        topdelete = { text = '▶' },
+        changedelete = { text = '▋' },
       },
       on_attach = function(bufnr)
         local gs = package.loaded.gitsigns
@@ -202,14 +202,17 @@ require('lazy').setup({
       end,
     },
   },
-
+  {
+    'rose-pine/neovim',
+    name = 'rose-pine',
+  },
   {
     -- Theme inspired by Atom
     'cideM/yui',
     priority = 1000,
     lazy = false,
     config = function()
-      vim.cmd([[colorscheme yui]])
+      vim.cmd [[colorscheme yui]]
     end,
   },
 
@@ -335,15 +338,16 @@ vim.opt.expandtab = true
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
-vim.keymap.set("v", "<leader>dd", [["_d]]) -- delete to blackhole register
-vim.keymap.set("v", "<Del>", [["_d]])      -- delete to blackhole register
-vim.keymap.set("v", "<BS>", [["_d]])       -- delete to blackhole register
-vim.keymap.set("n", "YY", "va{Vy")         -- yank function including the name
-vim.keymap.set('n', '<C-l>', '<C-^>')      -- swap betwee last 2 buffers
-vim.keymap.set('n', 'Q', '@qj')            -- macros
-vim.keymap.set('x', 'Q', ':norm @q<CR>')   -- repeat more macros
+vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv")
+vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv")
+vim.keymap.set('v', '<leader>d', [["_d]]) -- delete to blackhole register
+vim.keymap.set('v', '<Del>', [["_d]])     -- delete to blackhole register
+vim.keymap.set('v', '<BS>', [["_d]])      -- delete to blackhole register
+vim.keymap.set('n', 'YY', 'va{Vy')        -- yank function including the name
+vim.keymap.set('n', '<C-l>', '<C-^>')     -- swap betwee last 2 buffers
+vim.keymap.set('n', 'Q', '@qj')           -- macros
+vim.keymap.set('x', 'Q', ':norm @q<CR>')  -- repeat more macros
+vim.keymap.set('i', '<C-c>', '<Esc>')
 
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
@@ -354,6 +358,8 @@ vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous dia
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+vim.keymap.set('n', '<leader>k', '<cmd>lnext<CR>zz')
+vim.keymap.set('n', '<leader>j', '<cmd>lprev<CR>zz')
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
@@ -450,31 +456,30 @@ vim.keymap.set('n', '<leader>sG', ':LiveGrepGitRoot<cr>', { desc = '[S]earch by 
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
 
-
-local fugitiveAutogrup = vim.api.nvim_create_augroup("ThePrimeagen_Fugitive", {})
+local fugitiveAutogrup = vim.api.nvim_create_augroup('gitGroup', {})
 local autocmd = vim.api.nvim_create_autocmd
-autocmd("BufWinEnter", {
+autocmd('BufWinEnter', {
   group = fugitiveAutogrup,
-  pattern = "*",
+  pattern = '*',
   callback = function()
-    if vim.bo.ft ~= "fugitive" then
+    if vim.bo.ft ~= 'fugitive' then
       return
     end
 
     local bufnr = vim.api.nvim_get_current_buf()
     local opts = { buffer = bufnr, remap = false }
-    vim.keymap.set("n", "<leader>p", function()
-      vim.cmd.Git('push')
+    vim.keymap.set('n', '<leader>p', function()
+      vim.cmd.Git 'push'
     end, opts)
 
     -- rebase always
-    vim.keymap.set("n", "<leader>P", function()
-      vim.cmd.Git({ 'pull', '--rebase' })
+    vim.keymap.set('n', '<leader>P', function()
+      vim.cmd.Git { 'pull', '--rebase' }
     end, opts)
 
     -- NOTE: It allows me to easily set the branch i am pushing and any tracking
     -- needed if i did not set the branch up correctly
-    vim.keymap.set("n", "<leader>t", ":Git push -u origin ", opts);
+    vim.keymap.set('n', '<leader>t', ':Git push -u origin ', opts)
   end,
 })
 
@@ -604,8 +609,8 @@ local on_attach = function(_, bufnr)
     vim.lsp.buf.format()
   end, { desc = 'Format current buffer with LSP' })
 end
-
-vim.keymap.set({ 'n', 'i' }, '<D-i>', vim.lsp.buf.signature_help)
+-- vim.keymap.set({ 'i' }, '<D-i>', vim.lsp.buf.signature_help)
+vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help)
 
 -- document existing key chains
 require('which-key').register {
