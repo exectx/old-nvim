@@ -89,6 +89,7 @@ P.S. You can delete this when you're done too. It's your config now! :)
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+vim.opt.termguicolors = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -101,6 +102,7 @@ vim.opt.number = true
 --  Experiment for yourself to see if you like it!
 -- vim.opt.relativenumber = true
 
+-- NOTE: hi
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
 
@@ -243,17 +245,15 @@ require('lazy').setup {
   -- See `:help gitsigns` to understand what the configuration keys do
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
-    opts = {
-      signs = {
-        add = { text = '▋' },
-        change = { text = '▋' },
-        delete = { text = '▶' },
-        topdelete = { text = '▶' },
-        changedelete = { text = '▋' },
-      },
-    },
     config = function()
       require('gitsigns').setup {
+        signs = {
+          add = { text = '▋' },
+          change = { text = '▋' },
+          delete = { text = '▶' },
+          topdelete = { text = '▶' },
+          changedelete = { text = '▋' },
+        },
         on_attach = function(bufnr)
           local gs = package.loaded.gitsigns
 
@@ -772,8 +772,13 @@ require('lazy').setup {
       }
     end,
   },
-
-  'rose-pine/neovim',
+  {
+    'mcchrish/zenbones.nvim',
+    dependencies = {
+      'rktjmp/lush.nvim',
+    },
+    lazy = false,
+  },
   { -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is
@@ -782,8 +787,10 @@ require('lazy').setup {
     'cideM/yui',
     lazy = false, -- make sure we load this during startup if it is your main colorscheme
     priority = 1000, -- make sure to load this before all the other start plugins
+    dependencies = { 'mcchrish/zenbones.nvim' },
     config = function()
       -- Load the colorscheme here
+      vim.cmd.colorscheme 'zenbones'
       vim.cmd.colorscheme 'yui'
     end,
   },
@@ -825,6 +832,9 @@ require('lazy').setup {
 
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter-textobjects',
+    },
     build = ':TSUpdate',
     config = function()
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
@@ -845,6 +855,21 @@ require('lazy').setup {
             node_incremental = '<c-space>',
             scope_incremental = '<c-s>',
             node_decremental = '<c-p>',
+          },
+        },
+        textobjects = {
+          select = {
+            enable = true,
+            lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
+            keymaps = {
+              -- You can use the capture groups defined in textobjects.scm
+              ['aA'] = '@parameter.outer',
+              ['iA'] = '@parameter.inner',
+              ['aF'] = '@function.outer',
+              ['iF'] = '@function.inner',
+              ['ac'] = '@class.outer',
+              ['ic'] = '@class.inner',
+            },
           },
         },
       }
