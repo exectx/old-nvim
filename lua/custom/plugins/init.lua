@@ -16,6 +16,8 @@ vim.keymap.set('n', 'YY', 'va{Vy') -- yank function including the name
 vim.keymap.set('n', 'Q', '@qj') -- macros
 vim.keymap.set('x', 'Q', ':norm @q<CR>') -- repeat more macros
 vim.keymap.set('i', '<C-c>', '<Esc>')
+-- Signature help
+vim.keymap.set({ 'i', 'n' }, '<C-k>', vim.lsp.buf.signature_help)
 
 -- More Diagnostics
 vim.keymap.set('n', '<leader>l', function()

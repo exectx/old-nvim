@@ -140,6 +140,9 @@ vim.opt.splitbelow = true
 --  and :help 'listchars'
 vim.opt.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.expandtab = true
+vim.opt.tabstop = 2
+vim.opt.shiftwidth = 2
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
@@ -657,7 +660,7 @@ require('lazy').setup {
           return
         end
         return {
-          timeout_ms = 1500,
+          timeout_ms = 5000,
           lsp_fallback = true,
         }
       end,
@@ -668,6 +671,7 @@ require('lazy').setup {
         javascript = { 'prettier' },
         typescriptreact = { 'prettier' },
         typescript = { 'prettier' },
+        bib = { 'bibtex-tidy' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
