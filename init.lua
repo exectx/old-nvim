@@ -613,6 +613,10 @@ require('lazy').setup({
         },
       }
 
+      local non_mason_servers = {
+        gleam = {},
+      }
+
       -- Ensure the servers and tools above are installed
       --  To check the current status of installed tools and/or manually install
       --  other tools, you can run
@@ -632,6 +636,15 @@ require('lazy').setup({
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
+      local setup_server_lspconfig = function(server_name)
+        local server = non_mason_servers[server_name] or {}
+        -- This handles overriding only values explicitly passed
+        -- by the server configuration above. Useful when disabling
+        -- certain features of an LSP (for example, turning off formatting for tsserver)
+        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+        require('lspconfig')[server_name].setup(server)
+      end
+
       require('mason-lspconfig').setup {
         handlers = {
           function(server_name)
@@ -644,6 +657,9 @@ require('lazy').setup({
           end,
         },
       }
+
+      -- Non Mason Setup - LspConfig Setup
+      setup_server_lspconfig 'gleam'
     end,
   },
 
@@ -795,16 +811,6 @@ require('lazy').setup({
       -- Load the colorscheme here
       vim.cmd.colorscheme 'zenbones'
       vim.cmd.colorscheme 'yui'
-    'folke/tokyonight.nvim',
-    priority = 1000, -- make sure to load this before all the other start plugins
-    init = function()
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
-
-      -- You can configure highlights by doing something like
-      vim.cmd.hi 'Comment gui=none'
     end,
   },
 
@@ -872,7 +878,7 @@ require('lazy').setup({
         auto_install = true,
         highlight = { enable = true },
         indent = { enable = true },
-        autotag = { enable = true },
+        autotag = { enable = true, enable_rename = true },
         matchup = { enable = true },
         incremental_selection = {
           enable = true,
@@ -928,9 +934,6 @@ require('lazy').setup({
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information see: :help lazy.nvim-lazy.nvim-structuring-your-plugins
   { import = 'custom.plugins' },
-}
-  --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
 }, {
   ui = {
     -- If you have a Nerd Font, set icons to an empty table which will use the
