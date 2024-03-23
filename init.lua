@@ -617,10 +617,6 @@ require('lazy').setup({
         },
       }
 
-      local non_mason_servers = {
-        gleam = {},
-      }
-
       -- Ensure the servers and tools above are installed
       --  To check the current status of installed tools and/or manually install
       --  other tools, you can run
@@ -640,15 +636,6 @@ require('lazy').setup({
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
-      local setup_server_lspconfig = function(server_name)
-        local server = non_mason_servers[server_name] or {}
-        -- This handles overriding only values explicitly passed
-        -- by the server configuration above. Useful when disabling
-        -- certain features of an LSP (for example, turning off formatting for tsserver)
-        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-        require('lspconfig')[server_name].setup(server)
-      end
-
       require('mason-lspconfig').setup {
         handlers = {
           function(server_name)
@@ -663,7 +650,8 @@ require('lazy').setup({
       }
 
       -- Non Mason Setup - LspConfig Setup
-      setup_server_lspconfig 'gleam'
+      require('lspconfig').gleam.setup {}
+      require('lspconfig').astro.setup {}
     end,
   },
 
@@ -879,6 +867,7 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     dependencies = {
       'nvim-treesitter/nvim-treesitter-textobjects',
+      'windwp/nvim-ts-autotag',
     },
     build = ':TSUpdate',
     opts = {
