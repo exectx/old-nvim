@@ -631,8 +631,18 @@ require('lazy').setup({
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format lua code
         'prettier',
-        'eslint_d',
         'latexindent',
+        'bibtex-tidy',
+        'eslint-lsp',
+        'css-lsp',
+        'tectonic',
+        'jsonlint',
+        'pyright',
+        'vtsls',
+        'rust-analyzer',
+        'texlab',
+        'tailwindcss-language-server',
+        'svelte-language-server',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -673,6 +683,9 @@ require('lazy').setup({
           notify_on_error = true,
         }
       end,
+      -- format_after_save = {
+      --   lsp_fallback = true,
+      -- },
       formatters_by_ft = {
         lua = { 'stylua' },
         yaml = { 'prettier' },
@@ -682,12 +695,36 @@ require('lazy').setup({
         typescript = { 'prettier' },
         bib = { 'bibtex-tidy' },
         tex = { 'latexindent' },
+        -- astro = { 'prettier_astro' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         -- javascript = { { "prettierd", "prettier" } },
+      },
+      formatters = {
+        prettier_astro = function(bufnr)
+          -- find the prettier executable
+          local cmd = require('conform.util').find_executable({}, 'prettier')
+
+          -- check where astro-plugin is installed (project or global)
+          local astro_plugin = vim.fn.globpath(vim.fn.getcwd(), 'node_modules/prettier-plugin-astro', 1, 1)
+
+          -- print keys as comma separated string
+          print(vim.inspect(astro_plugin))
+
+          return {
+            command = cmd,
+            args = {
+              '--plugin',
+              'prettier-plugin-tailwindcss',
+              '--plugin',
+              'prettier-plugin-astro',
+              '$FILENAME',
+            },
+          }
+        end,
       },
     },
   },
