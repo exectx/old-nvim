@@ -120,6 +120,9 @@ vim.opt.clipboard = 'unnamedplus'
 -- Enable break indent
 vim.opt.breakindent = true
 
+-- Font for gui clients
+vim.o.guifont = 'JetBrainsMonoNL Nerd Font Mono:h15' -- text below applies for VimScript
+
 -- Save undo history
 vim.opt.undofile = true
 
@@ -146,9 +149,10 @@ vim.opt.splitbelow = true
 --  and `:help 'listchars'`
 vim.opt.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
-vim.opt.expandtab = true
+-- vim.opt.expandtab = true
+-- vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
-vim.opt.shiftwidth = 2
+vim.g.sleuth_defaults = 'tabstop=2'
 
 vim.opt.linebreak = true
 
@@ -401,7 +405,17 @@ require('lazy').setup({
         --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
         --   },
         -- },
-        -- pickers = {}
+        pickers = {
+          find_files = {
+            find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden', '--ignore-file', '.gitignore', '--no-ignore' },
+          },
+          grep_string = {
+            additional_args = { '--hidden', '--iglob', '!.git' },
+          },
+          live_grep = {
+            additional_args = { '--no-ignore', '--ignore-file', '.gitignore', '--hidden', '--iglob', '!.git' },
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -633,7 +647,7 @@ require('lazy').setup({
         'prettier',
         'latexindent',
         'bibtex-tidy',
-        'eslint-lsp',
+        -- 'eslint-lsp',
         'css-lsp',
         'tectonic',
         'jsonlint',
@@ -641,7 +655,7 @@ require('lazy').setup({
         'vtsls',
         'rust-analyzer',
         'texlab',
-        'tailwindcss-language-server',
+        -- 'tailwindcss-language-server',
         'svelte-language-server',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -661,7 +675,20 @@ require('lazy').setup({
 
       -- Non Mason Setup - LspConfig Setup
       require('lspconfig').gleam.setup {}
-      require('lspconfig').astro.setup {}
+      local default_caps = {
+        workspace = {
+          didChangeWatchedFiles = {
+            dynamicRegistration = true,
+          },
+        },
+      }
+      -- Inject lsp thingy into nvim-cmp
+      -- local astro_capabilities = vim.tbl_deep_extend('keep', default_caps, require('cmp_nvim_lsp').default_capabilities())
+      require('lspconfig').astro.setup {
+        -- capabilities = astro_capabilities,
+      }
+      require('lspconfig').tailwindcss.setup {}
+      require('lspconfig').eslint.setup {}
     end,
   },
 
@@ -710,6 +737,7 @@ require('lazy').setup({
 
           -- check where astro-plugin is installed (project or global)
           local astro_plugin = vim.fn.globpath(vim.fn.getcwd(), 'node_modules/prettier-plugin-astro', 1, 1)
+          print(astro_plugin)
 
           -- print keys as comma separated string
           print(vim.inspect(astro_plugin))
@@ -849,14 +877,16 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`
-    'cideM/yui',
+    -- 'cideM/yui',
+    'mcchrish/zenbones.nvim',
     lazy = false, -- make sure we load this during startup if it is your main colorscheme
     priority = 1000, -- make sure to load this before all the other start plugins
-    dependencies = { 'mcchrish/zenbones.nvim' },
+    dependencies = { 'mcchrish/zenbones.nvim', 'cideM/yui' },
     config = function()
       -- Load the colorscheme here
-      vim.cmd.colorscheme 'zenbones'
-      vim.cmd.colorscheme 'yui'
+      -- vim.cmd.colorscheme 'zenbones'
+      -- vim.cmd.colorscheme 'yui'
+      vim.cmd.colorscheme 'rosebones'
     end,
   },
 
@@ -872,7 +902,14 @@ require('lazy').setup({
       --  - va)  - [V]isually select [A]round [)]paren
       --  - yinq - [Y]ank [I]nside [N]ext [']quote
       --  - ci'  - [C]hange [I]nside [']quote
-      require('mini.ai').setup { n_lines = 500 }
+
+      local spec_treesitter = require('mini.ai').gen_spec.treesitter
+      -- require('mini.ai').setup {
+      --   n_lines = 500,
+      --   custom_textobjects = {
+      --     t = spec_treesitter { a = '@function.outer', i = '@function.inner' },
+      --   },
+      -- }
 
       -- Add/delete/replace surroundings (brackets, quotes, etc.)
       --
@@ -1009,5 +1046,6 @@ require('lazy').setup({
   },
 })
 
+-- vim.opt.tabstop = 2
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

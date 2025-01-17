@@ -9,9 +9,9 @@ return {
     vim.keymap.set('n', '<leader>a', function()
       harpoon:list():append()
     end)
-    vim.keymap.set('n', '<D-S-m>', function()
+    vim.keymap.set('n', '<D-m>', function()
       harpoon.ui:toggle_quick_menu(harpoon:list())
-    end)
+    end, { desc = 'Open harpoon window' })
 
     vim.keymap.set('n', '<D-S-j>', function()
       harpoon:list():select(1)

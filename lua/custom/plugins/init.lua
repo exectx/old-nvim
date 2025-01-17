@@ -5,6 +5,7 @@
 
 -- Custom
 vim.keymap.set('n', '<D-p>', require('telescope.builtin').find_files, {})
+vim.keymap.set('n', '<D-S-p>', require('telescope.builtin').find_files, {})
 vim.keymap.set('n', '<D-k>', require('telescope.builtin').live_grep)
 vim.keymap.set('n', '<C-`>', '<C-^>')
 vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv")
